@@ -1,0 +1,25 @@
+
+sudo: required
+
+services:
+        - docker
+
+before_install:         
+        - docker build -t gkulkarni30/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+        - docker run gkulkarni30/react-test npm test -- --coverage
+
+after_success:
+        - docker build -t gkulkarni30/multi-client ./client
+        - docker build -t gkulkarni30/multi-nginx  ./nginx
+        - docker build -t gkulkarni30/multi-server ./server
+        - docker build -t gkulkarni30/multi-worker ./worker
+        
+        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+
+        - docker push gkulkarni30/multi-client
+        - docker push gkulkarni30/multi-nginx
+        - docker push gkulkarni30/multi-server
+        - docker push gkulkarni30/multi-worker
+
